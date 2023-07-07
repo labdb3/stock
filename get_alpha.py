@@ -6,7 +6,7 @@ def get_stock(start_date, end_date, code):
     # 连接数据库
     connection = pymysql.connect(host='localhost',
                                  user='root',
-                                 password='root',
+                                 password='root@lab3',
                                  db='stock_analysis')
 
     try:
