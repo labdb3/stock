@@ -5,7 +5,7 @@ import os
 
 conn = pymysql.connect(host='127.0.0.1', port=3306, user='root',password='root@lab3', db='stock_analysis')
 c=conn.cursor()
-table = 'stock'
+table = 'stock_trade'
 header = ['ts_code','trade_date', 'open','high','low', 'close','pre_close','pct_chg','vol', 'amount']
 fpath = 'a_share.csv'
 file = open(fpath)

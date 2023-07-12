@@ -37,4 +37,3 @@ def get_stock(start_date, end_date, code):
 demo_result = get_stock("2020-01-01","2023-07-05","430047.BJ")
 ##print(demo_result1)
 another_alpha = get_alpha(demo_result)
-##print(demo_alpha.head(10))
