@@ -1,6 +1,5 @@
 from Alpha_code_1 import *
 import pymysql
-import tushare as ts
 
 def get_stock(start_date, end_date, code):
     # 连接数据库
@@ -8,13 +7,12 @@ def get_stock(start_date, end_date, code):
                                  user='root',
                                  password='root@lab3',
                                  db='stock_analysis')
-
     try:
         # 创建游标对象
         cursor = connection.cursor()
 
         # 执行 SQL 查询
-        sql = "SELECT * FROM stock WHERE trade_date BETWEEN %s AND %s AND ts_code = %s order by trade_date asc"
+        sql = "SELECT * FROM stock_trade WHERE trade_date BETWEEN %s AND %s AND ts_code = %s order by trade_date asc"
         cursor.execute(sql, (start_date, end_date, code))
 
         # 获取查询结果
@@ -35,5 +33,6 @@ def get_stock(start_date, end_date, code):
 
 
 demo_result = get_stock("2020-01-01","2023-07-05","430047.BJ")
-##print(demo_result1)
 another_alpha = get_alpha(demo_result)
+print(another_alpha['alpha012'])
+

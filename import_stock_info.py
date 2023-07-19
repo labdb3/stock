@@ -3,7 +3,7 @@ import pandas as pd
 import csv
 import os
 
-conn = pymysql.connect(host='127.0.0.1', port=3306, user='root',password='root', db='stock_analysis')
+conn = pymysql.connect(host='127.0.0.1', port=3306, user='root',password='root@lab3', db='stock_analysis')
 c=conn.cursor()
 table = 'stock_info'
 header = ['ts_code','company_name', 'category']
