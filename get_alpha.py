@@ -95,6 +95,7 @@ def get_stock_with_code(start_date='2020-01-01', end_date='2023-07-05', code_lis
 
 ##demo_result = get_csi300_stock("2023-05-10","2023-07-05")
 ##demo_result = get_csi500_stock("2023-05-10","2023-07-05")
+##demo_result = get_stock_with_code("2023-01-10","2023-07-05",["600000.SH","600009.SH","688981.SH"])
 
 demo_result = get_stock_with_sector("软件开发","2023-01-10","2023-07-05")
 
@@ -110,7 +111,6 @@ demo_result['alpha006'] = another_alpha['alpha006']
 '''
 demo_result['alpha007'] = another_alpha['alpha007']
 demo_result['alpha008'] = another_alpha['alpha008']
-##demo_result.to_csv("a.csv")
 print(demo_result)
 
 

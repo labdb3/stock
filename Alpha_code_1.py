@@ -231,7 +231,8 @@ def decay_linear(df, period=10):
     return pd.DataFrame(na_lwma, index=df.index, columns=['CLOSE'])  
 # endregion
 
-def get_alpha(df):
+def get_alpha(stock):
+        df = stock.copy()
         stock=Alphas(df)
         df['alpha001']=stock.alpha001()
         df['alpha002']=stock.alpha002()
