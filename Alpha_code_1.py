@@ -6,51 +6,66 @@ from numpy import sign
 from scipy.stats import rankdata
 
 # region Auxiliary functions
-def ts_sum(df, window=10):
+def ts_sum(df,code, window=10):
     """
     Wrapper function to estimate rolling sum.
     :param df: a pandas DataFrame.
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series min over the past 'window' days.
     """
-    
-    return df.rolling(window).sum()
+    temp = pd.DataFrame({'df':df, 'ts_code': code})
+    group = temp.groupby("ts_code")
+    temp['ts_sum'] = group['df'].rolling(window).sum().reset_index(level=0, drop=True)
+    return temp['ts_sum']
 
-def sma(df, window=10):
+def sma(df ,code, window=10):
     """
     Wrapper function to estimate SMA.
     :param df: a pandas DataFrame.
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series min over the past 'window' days.
     """
-    return df.rolling(window).mean()
+    temp = pd.DataFrame({'df':df, 'ts_code': code})
+    group = temp.groupby("ts_code")
+    temp['sma'] = group['df'].rolling(window).mean().reset_index(level=0, drop=True)
+    return temp['sma']
 
-def stddev(df, window=10):
+def stddev(df, code, window=2):
     """
     Wrapper function to estimate rolling standard deviation.
     :param df: a pandas DataFrame.
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series min over the past 'window' days.
     """
-    return df.rolling(window).std()
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby("ts_code")
+    temp['std_dev'] = group['df'].rolling(window).std().reset_index(level=0, drop=True)
+    return temp['std_dev']
 
-def correlation(x, y, window=10):
+def correlation(x, y, code, window=10):
     """
     Wrapper function to estimate rolling corelations.
     :param df: a pandas DataFrame.
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series min over the past 'window' days.
     """
-    return x.rolling(window).corr(y)
+    temp = pd.DataFrame({'x':x, 'y':y,'ts_code':code})
+    ##print(temp)
+    group = temp.groupby('ts_code')
+    temp['corr'] = group.apply(lambda g: g['x'].rolling(window).corr(g['y'])).reset_index(level=0, drop=True)
+    return temp['corr']
 
-def covariance(x, y, window=10):
+def covariance(x, y,code, window=10):
     """
     Wrapper function to estimate rolling covariance.
     :param df: a pandas DataFrame.
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series min over the past 'window' days.
     """
-    return x.rolling(window).cov(y)
+    temp = pd.DataFrame({'x':x, 'y':y,'ts_code':code})
+    group = temp.groupby('ts_code')
+    temp['cov'] = group.apply(lambda g: g['x'].rolling(window).cov(g['y'])).reset_index(level=0, drop=True)
+    return temp['cov']
 
 def rolling_rank(na):
     """
@@ -60,14 +75,18 @@ def rolling_rank(na):
     """
     return rankdata(na)[-1]
 
-def ts_rank(df, window=10):
+def ts_rank(df, code, window=10):
     """
     Wrapper function to estimate rolling rank.
     :param df: a pandas DataFrame.
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series rank over the past window days.
     """
-    return df.rolling(window).apply(rolling_rank)
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby('ts_code')
+
+    temp['ts_rank'] = group['df'].rolling(window).apply(rolling_rank).reset_index(level=0, drop=True)
+    return temp['ts_rank']
 
 def rolling_prod(na):
     """
@@ -86,50 +105,68 @@ def product(df, window=10):
     """
     return df.rolling(window).apply(rolling_prod)
 
-def ts_min(df, window=10):
+def ts_min(df, code, window=10):
     """
     Wrapper function to estimate rolling min.
     :param df: a pandas DataFrame.
+    :param code : ts_code dataframe, used in group by
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series min over the past 'window' days.
     """
-    return df.rolling(window).min()
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby("ts_code")
+    temp['ts_min'] = group['df'].rolling(window).min().reset_index(level=0, drop=True)
+    return temp['ts_min']
 
-def ts_max(df, window=10):
+def ts_max(df, code, window=10):
     """
     Wrapper function to estimate rolling min.
     :param df: a pandas DataFrame.
+    :param code : ts_code dataframe, used in group by
     :param window: the rolling window.
     :return: a pandas DataFrame with the time-series max over the past 'window' days.
     """
-    return df.rolling(window).max()
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby("ts_code")
+    temp['ts_max'] = group['df'].rolling(window).max().reset_index(level=0, drop=True)
+    return temp['ts_max']
 
-def delta(df, period=1):
+def delta(df, code, period=1):
     """
     Wrapper function to estimate difference.
     :param df: a pandas DataFrame.
+    :param code : ts_code dataframe, used in group by
     :param period: the difference grade.
     :return: a pandas DataFrame with today’s value minus the value 'period' days ago.
     """
-    return df.diff(period)
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby("ts_code")
+    temp['delta'] = group['df'].diff(period).reset_index(level=0, drop=True)
+    return temp['delta']
 
-def delay(df, period=1):
+def delay(df, code, period=1):
     """
     Wrapper function to estimate lag.
     :param df: a pandas DataFrame.
+    :param code : ts_code dataframe, used in group by
     :param period: the lag grade.
     :return: a pandas DataFrame with lagged time series
     """
-    return df.shift(period)
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby("ts_code")
+    temp['delay'] = group['df'].shift(period).reset_index(level=0, drop=True)
+    return temp['delay']
 
-def rank(df):
+def rank(df,trade_date):
     """
     Cross sectional rank
     :param df: a pandas DataFrame.
     :return: a pandas DataFrame with rank along columns.
     """
+    temp = pd.DataFrame({'df':df,'trade_date':trade_date})
+    temp['rank'] = temp.groupby('trade_date')['df'].rank(pct=True)
     #return df.rank(axis=1, pct=True)
-    return df.rank(pct=True)
+    return temp['rank']
 
 def scale(df, k=1):
     """
@@ -140,23 +177,33 @@ def scale(df, k=1):
     """
     return df.mul(k).div(np.abs(df).sum())
 
-def ts_argmax(df, window=10):
+def ts_argmax(df,code,window=10):
     """
     Wrapper function to estimate which day ts_max(df, window) occurred on
     :param df: a pandas DataFrame.
+    :param code : ts_code dataframe, used in group by
     :param window: the rolling window.
     :return: well.. that :)
     """
-    return df.rolling(window).apply(np.argmax) + 1 
+    ##return df.rolling(window).apply(np.argmax) + 1
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby("ts_code")
+    temp['ts_argmax'] = (group['df'].rolling(window).apply(np.argmax) + 1).reset_index(level=0, drop=True)
+    return temp['ts_argmax'] 
 
-def ts_argmin(df, window=10):
+
+def ts_argmin(df,code, window=10):
     """
     Wrapper function to estimate which day ts_min(df, window) occurred on
     :param df: a pandas DataFrame.
+    :param code : ts_code dataframe, used in group by
     :param window: the rolling window.
     :return: well.. that :)
     """
-    return df.rolling(window).apply(np.argmin) + 1
+    temp = pd.DataFrame({'df':df,'ts_code':code})
+    group = temp.groupby("ts_code")
+    temp['ts_argmin'] = (group['df'].rolling(window).apply(np.argmin) + 1).reset_index(level=0, drop=True)
+    return temp['ts_argmin']
 
 def decay_linear(df, period=10):
     """
@@ -186,7 +233,7 @@ def decay_linear(df, period=10):
 
 def get_alpha(df):
         stock=Alphas(df)
-        df['alpha001']=stock.alpha001() 
+        df['alpha001']=stock.alpha001()
         df['alpha002']=stock.alpha002()
         df['alpha003']=stock.alpha003()
         df['alpha004']=stock.alpha004()
@@ -194,6 +241,7 @@ def get_alpha(df):
         df['alpha006']=stock.alpha006()
         df['alpha007']=stock.alpha007()
         df['alpha008']=stock.alpha008()
+        '''
         df['alpha009']=stock.alpha009()
         df['alpha010']=stock.alpha010()
         df['alpha011']=stock.alpha011()
@@ -267,12 +315,14 @@ def get_alpha(df):
         df['alpha096']=stock.alpha096()
         df['alpha098']=stock.alpha098()
         df['alpha099']=stock.alpha099()
-        df['alpha101']=stock.alpha101()  
+        df['alpha101']=stock.alpha101()
+        '''
         return df
 
 class Alphas(object):
     def __init__(self, df_data):
-
+        self.trade_date = df_data['trade_date']
+        self.code = df_data['ts_code']
         self.open = df_data['open'] 
         self.high = df_data['high'] 
         self.low = df_data['low']   
@@ -282,45 +332,91 @@ class Alphas(object):
         self.vwap = (df_data['amount']*1000)/(df_data['vol']*100+1) 
         
     # Alpha#1	 (rank(Ts_ArgMax(SignedPower(((returns < 0) ? stddev(returns, 20) : close), 2.), 5)) -0.5)
+    '''
+    说明：rank指的是对所有股票进行某个指标的排序。rank默认是标准化以后的，及rank后除以总数。所以平均值是0。
+    上述策略讲的是，对每只股票过去5天（t-5）按照收盘价最高，或者下行波动率最高进行排名。
+    下行波动率最高的一天离计算时间越近，越可以投资。收盘价最高离计算时间越近，越可以投资。
+    标签：mean-reversion+momentum
+    '''
     def alpha001(self):
         inner = self.close.copy()
-        inner[self.returns < 0] = stddev(self.returns, 20)
-        return rank(ts_argmax(inner ** 2, 5))
+        inner[self.returns < 0] = stddev(self.returns,self.code,20)
+        inner = inner.apply(lambda x: x**2)
+        return rank(ts_argmax(inner,self.code, 5),self.trade_date)
     
     # Alpha#2	 (-1 * correlation(rank(delta(log(volume), 2)), rank(((close - open) / open)), 6))
+    '''
+    说明：对每一只股票计算过去6天每天的与前一天的log(V)的差和当日回报率。对所有股票，计算两个的rank，
+    对rank进行correlation计算。如果正相关性越高，越不能投资。负相关性越高，越能投资。
+    如果价格下降最大的时候对应于交易量最大的时候，或者价格上升最大的时候对应于交易量下降最大的时候，则可以投资。如果量价齐升或者齐跌，则不交易。
+    标签：量价理论
+    '''
     def alpha002(self):
-        df = -1 * correlation(rank(delta(log(self.volume), 2)), rank((self.close - self.open) / self.open), 6)
-        return df.replace([-np.inf, np.inf], 0).fillna(value=0)
+        df = -1 * correlation(rank(delta(log(self.volume),self.code, 2),self.trade_date), rank((self.close - self.open) / self.open,self.trade_date),self.code, 6)
+        return df
+    ##df.replace([-np.inf, np.inf], 0).fillna(value=0)
     
     # Alpha#3	 (-1 * correlation(rank(open), rank(volume), 10))
+    '''
+    说明：过去10天中，开盘价趋势和当日交易量趋势成正比的情况下，不投资。成反比的情况下，进行投资。
+    标签：量价理论
+    '''
     def alpha003(self):
-        df = -1 * correlation(rank(self.open), rank(self.volume), 10)
-        return df.replace([-np.inf, np.inf], 0).fillna(value=0)
+        ##print(rank(self.open,self.trade_date))
+        ##print(rank(self.volume,self.trade_date))
+        ##print(correlation(rank(self.open,self.trade_date), rank(self.volume,self.trade_date), self.code, 10))
+        df = -1 * correlation(rank(self.open,self.trade_date), rank(self.volume,self.trade_date), self.code, 10)
+        return df##df.replace([-np.inf, np.inf], 0).fillna(value=0)
     
     # Alpha#4	 (-1 * Ts_Rank(rank(low), 9))
+
+    '''
+    说明：Ts_Rank是时间序列上的排序,只返回最后一天(t-1)的值，区别于rank在横截面数据上的排序。对所有股票计算low的绝对值排序，对所有股票计算过去9天中low排序的排序。生成的是每一只股票，在t-1的时候，low在t-9内的百分位数。相当于如果low在t-1的时候，low的绝对值大小排名有所下降(变得更加便宜)，则购买。
+    标签：mean-reversion
+    '''
     def alpha004(self):
-        return -1 * ts_rank(rank(self.low), 9)
+        return -1 * ts_rank(rank(self.low,self.trade_date), self.code ,9)
     
     # Alpha#5	 (rank((open - (sum(vwap, 10) / 10))) * (-1 * abs(rank((close - vwap)))))
+    '''
+    说明：第一部分为vwap为每只股票每日的以交易量为权重的平均价格。sum对过去10日的vwap进行加总，平计算每日平均值，并用t-1日的开盘价减去该平均值。之后对差值进行排序。差值高的排序分数高。
+    第二部分为t-1日收盘价减去当日vwap之后的排序的绝对值(rank后理应全是正数为什么要绝对值?一种假设是因为此处rank包含了归一化处理)。
+    这里的潜在意义是：如果一只股票，t-1日的开盘价远低于过去十天的平均价格，并且，其t-1日收盘价远高于t-1日的vwap，则购买。
+    标签：momentum
+    '''
     def alpha005(self):
-        return  (rank((self.open - (sum(self.vwap, 10) / 10))) * (-1 * abs(rank((self.close - self.vwap)))))
+        return  (rank((self.open - (sum(self.vwap, 10) / 10)), self.trade_date) * (-1 * abs(rank((self.close - self.vwap), self.trade_date))))
     
     # Alpha#6	 (-1 * correlation(open, volume, 10))
+    '''
+    说明：过去10天中，每日的开盘价与当日的成交量之间的相关关系。如果开盘价和成交量同比上升或者下降，则不投资，如果两者完全相反，则投资。该值的绝对值大小可能会影响corr的大小，需要考虑进一步归一化处理。
+    标签：量价理论（结合2、3来看，量价理论的基本特征是：价格上涨的时候，不可与众人一同购买。价格下降的时候，大家都拿着，我们也得拿着。反之，当价格上涨的时候，却鲜少问津，可以考虑。价格下跌的时候，大家恐慌抛售，可以考虑。）
+    '''
     def alpha006(self):
-        df = -1 * correlation(self.open, self.volume, 10)
+        df = -1 * correlation(self.open, self.volume, self.code, 10)
         return df.replace([-np.inf, np.inf], 0).fillna(value=0)
     
     # Alpha#7	 ((adv20 < volume) ? ((-1 * ts_rank(abs(delta(close, 7)), 60)) * sign(delta(close, 7))) : (-1* 1))
+    '''
+    说明：adv{n}指的是过去n天的average daily volume，相当于过去20天的每日平均成交额。 计算t-1日的，七天收盘价差值*正负号，按照60天内的每个t-7差值排序后，乘以负号。如果t-1日成交额小于前20日平均值，则直接返回-1。
+    这里的潜在意义是：如果交易量走高，并且同时t-1天的价格下降在t-60个周期内的排名较高，则投资。
+    标签：量价理论(依然是：量价同边不买，量价反走考虑)
+    '''
     def alpha007(self):
-        adv20 = sma(self.volume, 20)
-        alpha = -1 * ts_rank(abs(delta(self.close, 7)), 60) * sign(delta(self.close, 7))
+        adv20 = sma(self.volume, self.code, 20)
+        alpha = -1 * ts_rank(abs(delta(self.close, self.code, 7)),self.code, 60) * sign(delta(self.close, self.code, 7))
         alpha[adv20 >= self.volume] = -1
         return alpha
     
     # Alpha#8	 (-1 * rank(((sum(open, 5) * sum(returns, 5)) - delay((sum(open, 5) * sum(returns, 5)),10))))
+    '''
+    说明：open*return事实上相当于得到dollar return(这么说也不准确，因为return也有可能是close-return或者close-close，而且这里不是每日的乘积后相加，而是相加后乘积)，计算t-5:t-1之间的dollar return总和，减去t-10之前的dollar return总和。
+    潜在意义是，如果10天前的dollar return总和远超出t-1的时候的dollar return，则投资。如果t-1的5天dolloar return远高于10天前的5天dollar return，则不投资。
+    标签：mean-reversion
+    '''
     def alpha008(self):
-        return -1 * (rank(((ts_sum(self.open, 5) * ts_sum(self.returns, 5)) -
-                           delay((ts_sum(self.open, 5) * ts_sum(self.returns, 5)), 10))))
+        return -1 * (rank(((ts_sum(self.open, self.code, 5) * ts_sum(self.returns, self.code, 5)) -
+                           delay((ts_sum(self.open, self.code, 5) * ts_sum(self.returns,self.code, 5)),self.code, 10)),self.trade_date))
     
     # Alpha#9	 ((0 < ts_min(delta(close, 1), 5)) ? delta(close, 1) : ((ts_max(delta(close, 1), 5) < 0) ?delta(close, 1) : (-1 * delta(close, 1))))
     def alpha009(self):

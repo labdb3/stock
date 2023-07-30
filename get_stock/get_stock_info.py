@@ -25,7 +25,7 @@ def get_stock_list():
         cursor = connection.cursor()
 
         # 执行 SQL 查询
-        sql = "SELECT distinct ts_code FROM stock"
+        sql = "SELECT distinct ts_code FROM stock_trade"
         cursor.execute(sql)
 
         # 获取查询结果
@@ -60,7 +60,7 @@ def reverse_convert_stock_code(code):
     code_num = code[2:]
     return code_num +"."+ prefix
 
-get_stock_sector("sh688001")
+
 demo = get_stock_list()
 a_stock_list = convert_stock_code_list(demo)  # 示例股票代码列表
 data = []
